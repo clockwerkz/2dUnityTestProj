@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 20;
     public Transform feet;
     public LayerMask groundLayer;
+    public Transform wallGrab;
 
     private Rigidbody2D _rigidbody2d;
     private float _mx;
@@ -22,10 +23,6 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         _mx = Input.GetAxisRaw("Horizontal");
-        if (Input.GetButtonDown("Jump") && IsGrounded())
-        {
-            Jump();
-        }
     }
 
     // Update is called once per frame
@@ -33,6 +30,11 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 movement = new Vector2(_mx * moveSpeed, _rigidbody2d.velocity.y);
         _rigidbody2d.velocity = movement;
+        if (Input.GetButtonDown("Jump") && (IsGrounded() || IsWallGrabbing()))
+        {
+            Jump();
+        }
+        IsWallGrabbing();
     }
 
     void Jump()
@@ -43,7 +45,13 @@ public class PlayerMovement : MonoBehaviour
 
     bool IsGrounded()
     {
-        Collider2D groundCheck = Physics2D.OverlapCircle(feet.position, 0.5f, groundLayer);
+        Collider2D groundCheck = Physics2D.OverlapCircle(feet.position, 0.2f, groundLayer);
         return groundCheck != null;
+    }
+
+    bool IsWallGrabbing()
+    {
+        Collider2D wallCheck = Physics2D.OverlapCircle(wallGrab.position, 0.2f, groundLayer);
+        return wallCheck != null && Input.GetAxisRaw("Horizontal") > 0;
     }
 }
